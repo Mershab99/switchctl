@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% set active_page = "dashboard" %}
+
+{% block title %}Dashboard - switchctl{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-900">Dashboard</h2>
+    <p class="text-sm text-gray-500 mt-1">Switch overview and status</p>
+</div>
+
+<!-- Switch Info Card -->
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <div>
+            <h3 class="text-lg font-semibold text-gray-900">{{ status.hostname }}</h3>
+            <p class="text-sm text-gray-500">{{ status.model }}</p>
+        </div>
+        <div class="flex items-center">
+            <span class="inline-block w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+            <span class="text-sm text-green-700 font-medium">Connected</span>
+        </div>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+        <div>
+            <span class="text-gray-500">Firmware</span>
+            <p class="font-medium">{{ status.version }}</p>
+        </div>
+        <div>
+            <span class="text-gray-500">Uptime</span>
+            <p class="font-medium">{{ status.uptime }}</p>
+        </div>
+        <div>
+            <span class="text-gray-500">Serial</span>
+            <p class="font-medium">{{ status.serial }}</p>
+        </div>
+        <div>
+            <span class="text-gray-500">Config Name</span>
+            <p class="font-medium">{{ config.name }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+    <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-3xl font-bold text-green-600">{{ ports_up }}</div>
+        <div class="text-sm text-gray-500 mt-1">Ports Up</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-3xl font-bold text-gray-400">{{ ports_down }}</div>
+        <div class="text-sm text-gray-500 mt-1">Ports Down</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-3xl font-bold text-red-500">{{ ports_disabled }}</div>
+        <div class="text-sm text-gray-500 mt-1">Disabled</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-3xl font-bold text-blue-600">{{ poe_active }}</div>
+        <div class="text-sm text-gray-500 mt-1">PoE Active</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-3xl font-bold text-purple-600">{{ vlan_count }}</div>
+        <div class="text-sm text-gray-500 mt-1">VLANs</div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="bg-white rounded-lg shadow p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-3">Power Summary</h3>
+    <div class="text-sm text-gray-600">
+        <p>Total PoE consumption: <span class="font-semibold text-blue-700">{{ total_poe_w }}W</span></p>
+        <p class="mt-1">Active PoE ports: <span class="font-semibold">{{ poe_active }}</span> of {{ status.ports | length }}</p>
+    </div>
+</div>
+{% endblock %}

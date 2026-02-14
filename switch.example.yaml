@@ -1,0 +1,155 @@
+# Aruba S2500 Switch Configuration
+# This is the declarative source of truth for switch state
+
+name: "homelab-s2500"
+
+# Connection credentials
+# Use environment variables for secrets: ${ENV_VAR_NAME}
+credentials:
+  host: "192.168.1.10"
+  username: "admin"
+  password: "${SWITCH_PASSWORD}"
+  enable_password: "${SWITCH_ENABLE_PASSWORD}"  # Optional
+  port: 22
+  device_type: "aruba_os"  # Don't change - this is for S2500
+
+# =============================================================================
+# VLAN Definitions
+# =============================================================================
+vlans:
+  - id: 1
+    name: "default"
+    
+  - id: 10
+    name: "management"
+    description: "Network management VLAN"
+    
+  - id: 20
+    name: "servers"
+    description: "Server infrastructure"
+    
+  - id: 30
+    name: "workstations"
+    description: "Employee workstations"
+    
+  - id: 40
+    name: "voip"
+    description: "VoIP phones"
+    
+  - id: 100
+    name: "iot"
+    description: "IoT devices - isolated"
+    
+  - id: 200
+    name: "guest"
+    description: "Guest network - internet only"
+
+# =============================================================================
+# Default Port Configuration
+# Applied to all ports unless overridden in 'ports' section
+# =============================================================================
+port_defaults:
+  enabled: true
+  mode: access           # access | trunk
+  access_vlan: 1
+  speed_duplex: auto     # auto | 10-half | 10-full | 100-half | 100-full | 1000-full
+  poe_enabled: true
+  poe_priority: low      # low | high | critical
+
+# =============================================================================
+# Port-Specific Configuration
+# Supports single ports ("1") or ranges ("1-10")
+# =============================================================================
+ports:
+  # ---------------------------------------------------------------------------
+  # Trunk Ports - Server/Hypervisor connections
+  # ---------------------------------------------------------------------------
+  "1":
+    description: "Proxmox Node 1 - Bond Member 1"
+    mode: trunk
+    trunk_native_vlan: 1
+    trunk_allowed_vlans: [1, 10, 20, 100]
+    poe_enabled: false
+    
+  "2":
+    description: "Proxmox Node 1 - Bond Member 2"
+    mode: trunk
+    trunk_native_vlan: 1
+    trunk_allowed_vlans: [1, 10, 20, 100]
+    poe_enabled: false
+
+  "3-4":
+    description: "Proxmox Node 2"
+    mode: trunk
+    trunk_allowed_vlans: "1,10,20,100"  # String format also works
+    poe_enabled: false
+
+  # ---------------------------------------------------------------------------
+  # Access Ports - Workstations
+  # ---------------------------------------------------------------------------
+  "10-20":
+    description: "Office workstations"
+    mode: access
+    access_vlan: 30
+    poe_enabled: true
+    poe_priority: low
+
+  # ---------------------------------------------------------------------------
+  # VoIP Phones
+  # ---------------------------------------------------------------------------
+  "21-30":
+    description: "VoIP phones"
+    mode: access
+    access_vlan: 40
+    poe_enabled: true
+    poe_priority: high  # Phones get priority power
+
+  # ---------------------------------------------------------------------------
+  # IoT / Camera Ports
+  # ---------------------------------------------------------------------------
+  "40-45":
+    description: "Security cameras"
+    mode: access
+    access_vlan: 100
+    poe_enabled: true
+    poe_priority: critical  # Cameras must stay powered
+
+  "46-48":
+    description: "IoT sensors"
+    mode: access
+    access_vlan: 100
+    poe_enabled: true
+    poe_priority: low
+
+  # ---------------------------------------------------------------------------
+  # Disabled/Reserved Ports
+  # ---------------------------------------------------------------------------
+  "31-39":
+    enabled: false
+    description: "Reserved - disabled for security"
+
+# =============================================================================
+# Uplink Ports (SFP+)
+# Port numbering may be 49-52 or sfp1-sfp4 depending on firmware
+# =============================================================================
+uplinks:
+  "49":
+    description: "Uplink to Core Switch - Primary"
+    mode: trunk
+    trunk_native_vlan: 1
+    trunk_allowed_vlans: "1-200"  # Range syntax
+    
+  "50":
+    description: "Uplink to Core Switch - Secondary"  
+    mode: trunk
+    trunk_native_vlan: 1
+    trunk_allowed_vlans: "1-200"
+    
+  "51":
+    description: "Inter-switch link"
+    mode: trunk
+    trunk_allowed_vlans: "1-200"
+    
+  "52":
+    enabled: false
+    description: "Spare SFP+ - disabled"

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% set active_page = "ports" %}
+
+{% block title %}Ports - switchctl{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-900">Port View</h2>
+    <p class="text-sm text-gray-500 mt-1">48 copper ports + 4 SFP+ uplinks &mdash; click a port for details</p>
+</div>
+
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <div class="mb-3 flex items-center justify-between">
+        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider">Front Panel</h3>
+        <span class="text-xs text-gray-400">Aruba S2500-48P</span>
+    </div>
+
+    <div class="overflow-x-auto">
+        <svg viewBox="0 0 {{ svg_width }} {{ svg_height }}" class="w-full" style="min-width: 800px;">
+            <!-- Background -->
+            <rect x="5" y="5" width="{{ svg_width - 10 }}" height="{{ svg_height - 10 }}" rx="8" fill="#1f2937" />
+
+            <!-- Port labels -->
+            <text x="12" y="{{ 30 + rect_h // 2 + 3 }}" fill="#9ca3af" font-size="8" font-family="monospace">Odd</text>
+            <text x="10" y="{{ 30 + rect_h + 4 + rect_h // 2 + 3 }}" fill="#9ca3af" font-size="8" font-family="monospace">Even</text>
+
+            {% for port in ports %}
+            <g class="cursor-pointer" hx-get="/ports/{{ port.id }}" hx-target="#port-modal" hx-swap="innerHTML">
+                <rect
+                    x="{{ port.x }}"
+                    y="{{ port.y }}"
+                    width="{{ port.get('width', rect_w) }}"
+                    height="{{ rect_h }}"
+                    rx="{{ port_radius }}"
+                    fill="{{ port.color }}"
+                    {% if port.stroke != 'none' %}
+                    stroke="{{ port.stroke }}"
+                    stroke-width="{{ port.stroke_width }}"
+                    {% endif %}
+                    opacity="0.9"
+                />
+                <text
+                    x="{{ port.tx }}"
+                    y="{{ port.ty }}"
+                    text-anchor="middle"
+                    fill="white"
+                    font-size="10"
+                    font-family="monospace"
+                    font-weight="bold"
+                >{{ port.id }}</text>
+                <title>{{ port.title_text }}</title>
+            </g>
+            {% endfor %}
+
+            <!-- SFP+ label -->
+            <text x="{{ 30 }}" y="{{ svg_height - 15 }}" fill="#9ca3af" font-size="9" font-family="monospace">SFP+ 10G Uplinks</text>
+        </svg>
+    </div>
+</div>
+
+<!-- Legend -->
+<div class="bg-white rounded-lg shadow p-4">
+    <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">Legend</h3>
+    <div class="flex flex-wrap gap-6 text-sm">
+        <div class="flex items-center">
+            <span class="inline-block w-4 h-4 rounded" style="background: #22c55e;"></span>
+            <span class="ml-2 text-gray-600">Link Up</span>
+        </div>
+        <div class="flex items-center">
+            <span class="inline-block w-4 h-4 rounded" style="background: #6b7280;"></span>
+            <span class="ml-2 text-gray-600">Link Down</span>
+        </div>
+        <div class="flex items-center">
+            <span class="inline-block w-4 h-4 rounded" style="background: #ef4444;"></span>
+            <span class="ml-2 text-gray-600">Disabled</span>
+        </div>
+        <div class="flex items-center">
+            <span class="inline-block w-4 h-4 rounded border-2" style="background: #22c55e; border-color: #3b82f6;"></span>
+            <span class="ml-2 text-gray-600">PoE Active</span>
+        </div>
+        <div class="flex items-center">
+            <span class="inline-block w-4 h-4 rounded" style="background: #f97316;"></span>
+            <span class="ml-2 text-gray-600">Config Drift</span>
+        </div>
+    </div>
+</div>
+{% endblock %}

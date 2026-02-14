@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}switchctl{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        [hx-indicator] .htmx-indicator { display: none; }
+        .htmx-request .htmx-indicator { display: inline; }
+        .htmx-request.htmx-indicator { display: inline; }
+    </style>
+</head>
+<body class="h-full">
+    <div class="flex h-full">
+        <!-- Sidebar -->
+        <div class="w-56 bg-gray-900 text-white flex flex-col flex-shrink-0">
+            <div class="p-4 border-b border-gray-700">
+                <h1 class="text-lg font-bold tracking-wide">switchctl</h1>
+                <p class="text-xs text-gray-400 mt-1">Aruba S2500 Manager</p>
+            </div>
+            <nav class="flex-1 py-4">
+                <a href="/" class="flex items-center px-4 py-2.5 text-sm hover:bg-gray-800 {% if active_page == 'dashboard' %}bg-gray-800 text-white{% else %}text-gray-300{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                    Dashboard
+                </a>
+                <a href="/ports" class="flex items-center px-4 py-2.5 text-sm hover:bg-gray-800 {% if active_page == 'ports' %}bg-gray-800 text-white{% else %}text-gray-300{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    Ports
+                </a>
+                <a href="/vlans" class="flex items-center px-4 py-2.5 text-sm hover:bg-gray-800 {% if active_page == 'vlans' %}bg-gray-800 text-white{% else %}text-gray-300{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                    VLANs
+                </a>
+                <a href="/diff" class="flex items-center px-4 py-2.5 text-sm hover:bg-gray-800 {% if active_page == 'diff' %}bg-gray-800 text-white{% else %}text-gray-300{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                    Diff / Apply
+                </a>
+            </nav>
+            <div class="p-4 border-t border-gray-700 text-xs text-gray-500">
+                switchctl v0.1.0
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 overflow-auto">
+            <main class="p-6">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Port detail modal -->
+    <div id="port-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" onclick="closePortModal()"></div>
+    <div id="port-modal" class="fixed right-0 top-0 h-full w-96 bg-white shadow-xl z-50 transform translate-x-full transition-transform duration-200 overflow-y-auto">
+    </div>
+
+    <script>
+        function openPortModal() {
+            document.getElementById('port-modal').classList.remove('translate-x-full');
+            document.getElementById('port-modal-backdrop').classList.remove('hidden');
+        }
+        function closePortModal() {
+            document.getElementById('port-modal').classList.add('translate-x-full');
+            document.getElementById('port-modal-backdrop').classList.add('hidden');
+        }
+        document.body.addEventListener('htmx:afterSwap', function(event) {
+            if (event.detail.target.id === 'port-modal') {
+                openPortModal();
+            }
+        });
+    </script>
+</body>
+</html>

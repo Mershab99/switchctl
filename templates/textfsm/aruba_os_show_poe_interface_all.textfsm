@@ -1,0 +1,12 @@
+Value PORT (\S+)
+Value POE_STATUS (Delivering|Searching|Disabled|Fault)
+Value POWER_MW (\d+\.?\d*)
+Value PRIORITY (low|high|critical)
+Value CLASS (\d+)
+
+Start
+  ^---+ -> PoEData
+
+PoEData
+  ^${PORT}\s+${POE_STATUS}\s+${POWER_MW}\s+${PRIORITY}\s+${CLASS}\s*$$ -> Record
+  ^${PORT}\s+${POE_STATUS}\s+${POWER_MW}\s+${PRIORITY}\s*$$ -> Record

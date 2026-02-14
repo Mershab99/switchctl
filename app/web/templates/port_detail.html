@@ -1,0 +1,135 @@
+<!-- HTMX partial: port detail slide-over content -->
+<div class="p-6">
+    <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-bold text-gray-900">Port {{ port_id }}</h3>
+        <button onclick="closePortModal()" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+    </div>
+
+    {% if port %}
+    <!-- Status -->
+    <div class="mb-6">
+        <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Current Status</h4>
+        <div class="space-y-2 text-sm">
+            <div class="flex justify-between py-1 border-b border-gray-100">
+                <span class="text-gray-500">Admin Status</span>
+                <span class="font-medium {% if port.admin_status == 'up' %}text-green-600{% else %}text-red-600{% endif %}">
+                    {{ port.admin_status }}
+                </span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-gray-100">
+                <span class="text-gray-500">Oper Status</span>
+                <span class="font-medium {% if port.oper_status == 'up' %}text-green-600{% else %}text-gray-400{% endif %}">
+                    {{ port.oper_status }}
+                </span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-gray-100">
+                <span class="text-gray-500">Speed</span>
+                <span class="font-medium">{{ port.speed }}</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-gray-100">
+                <span class="text-gray-500">Duplex</span>
+                <span class="font-medium">{{ port.duplex }}</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-gray-100">
+                <span class="text-gray-500">VLAN</span>
+                <span class="font-medium">{{ port.vlan or '-' }}</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-gray-100">
+                <span class="text-gray-500">Description</span>
+                <span class="font-medium">{{ port.description or '-' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- PoE -->
+    <div class="mb-6">
+        <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Power over Ethernet</h4>
+        <div class="space-y-2 text-sm">
+            <div class="flex justify-between py-1 border-b border-gray-100">
+                <span class="text-gray-500">PoE Status</span>
+                <span class="font-medium {% if port.poe_status == 'delivering' %}text-blue-600{% elif port.poe_status == 'disabled' %}text-gray-400{% else %}text-yellow-600{% endif %}">
+                    {{ port.poe_status }}
+                </span>
+            </div>
+            {% if port.poe_status == 'delivering' %}
+            <div class="flex justify-between py-1 border-b border-gray-100">
+                <span class="text-gray-500">Power Draw</span>
+                <span class="font-medium text-blue-600">{{ "%.1f"|format(port.poe_power_mw / 1000) }}W</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- MAC Addresses -->
+    {% if port.mac_addresses %}
+    <div class="mb-6">
+        <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Connected Devices</h4>
+        <div class="space-y-1">
+            {% for mac in port.mac_addresses %}
+            <div class="text-sm font-mono bg-gray-50 px-3 py-1.5 rounded">{{ mac }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Config from YAML -->
+    {% if port_config %}
+    <div class="mb-6">
+        <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">YAML Configuration</h4>
+        <div class="space-y-2 text-sm">
+            <div class="flex justify-between py-1 border-b border-gray-100">
+                <span class="text-gray-500">Enabled</span>
+                <span class="font-medium">{{ port_config.enabled }}</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-gray-100">
+                <span class="text-gray-500">Mode</span>
+                <span class="font-medium">{{ port_config.mode }}</span>
+            </div>
+            {% if port_config.mode == 'access' and port_config.access_vlan %}
+            <div class="flex justify-between py-1 border-b border-gray-100">
+                <span class="text-gray-500">Access VLAN</span>
+                <span class="font-medium">{{ port_config.access_vlan }}</span>
+            </div>
+            {% endif %}
+            {% if port_config.mode == 'trunk' %}
+            {% if port_config.trunk_native_vlan %}
+            <div class="flex justify-between py-1 border-b border-gray-100">
+                <span class="text-gray-500">Native VLAN</span>
+                <span class="font-medium">{{ port_config.trunk_native_vlan }}</span>
+            </div>
+            {% endif %}
+            {% if port_config.trunk_allowed_vlans %}
+            <div class="flex justify-between py-1 border-b border-gray-100">
+                <span class="text-gray-500">Allowed VLANs</span>
+                <span class="font-medium text-xs">{{ port_config.trunk_allowed_vlans }}</span>
+            </div>
+            {% endif %}
+            {% endif %}
+            <div class="flex justify-between py-1 border-b border-gray-100">
+                <span class="text-gray-500">PoE Enabled</span>
+                <span class="font-medium">{{ port_config.poe_enabled }}</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-gray-100">
+                <span class="text-gray-500">PoE Priority</span>
+                <span class="font-medium">{{ port_config.poe_priority }}</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-gray-100">
+                <span class="text-gray-500">Speed/Duplex</span>
+                <span class="font-medium">{{ port_config.speed_duplex }}</span>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="mb-6">
+        <p class="text-sm text-gray-400 italic">No YAML config for this port (using defaults)</p>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <p class="text-sm text-gray-500">Port {{ port_id }} not found.</p>
+    {% endif %}
+</div>
