@@ -1,0 +1,7 @@
+Value MODEL (\S+)
+Value VERSION (\S+)
+Value UPTIME (.+)
+
+Start
+  ^ArubaOS\s+\(MODEL:\s+${MODEL}\),\s+Version\s+${VERSION}
+  ^Switch\s+uptime\s+is\s+${UPTIME} -> Record

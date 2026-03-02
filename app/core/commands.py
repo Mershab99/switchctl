@@ -2,6 +2,21 @@ from __future__ import annotations
 
 from app.models import ConfigDiff, PortConfig, VlanConfig
 
+# Number of copper ports per module on the S2500-48P
+_COPPER_PORTS = 48
+
+
+def port_id_to_interface(port_id: str) -> str:
+    """Map port ID string to ArubaOS interface name.
+
+    "0"-"47"  -> GE0/0/0 - GE0/0/47  (copper)
+    "48"-"49" -> GE0/1/0 - GE0/1/1   (SFP+ uplinks)
+    """
+    pid = int(port_id)
+    if pid < _COPPER_PORTS:
+        return f"GE0/0/{pid}"
+    return f"GE0/1/{pid - _COPPER_PORTS}"
+
 
 def generate_vlan_commands(diff: ConfigDiff, vlan: VlanConfig) -> list[str]:
     """Generate ArubaOS CLI commands for a VLAN diff."""
@@ -22,7 +37,7 @@ def generate_vlan_commands(diff: ConfigDiff, vlan: VlanConfig) -> list[str]:
 def generate_port_commands(port_id: str, config: PortConfig) -> list[str]:
     """Generate ArubaOS CLI commands for a port configuration."""
     commands: list[str] = []
-    commands.append(f"interface GE0/0/{port_id}")
+    commands.append(f"interface {port_id_to_interface(port_id)}")
 
     if config.description:
         commands.append(f'  description "{config.description}"')

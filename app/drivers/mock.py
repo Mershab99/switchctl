@@ -23,8 +23,8 @@ class MockS2500Driver(BaseDriver):
     def get_status(self) -> SwitchStatus:
         return SwitchStatus(
             hostname="homelab-s2500",
-            model="Aruba S2500-48P",
-            version="7.4.1.8",
+            model="ArubaS2500-48P",
+            version="7.4.1.12",
             uptime="45 days, 12:34:56",
             serial="SG12ABC345",
             ports=self.get_port_status(),
@@ -46,22 +46,16 @@ class MockS2500Driver(BaseDriver):
         ports: dict[str, PortStatus] = {}
         random.seed(42)  # Deterministic fake data
 
-        # Port definitions matching switch.example.yaml patterns
+        # Port definitions matching switch.yaml patterns (0-indexed)
         port_defs = {
             # Trunk ports - servers
-            "1": ("Proxmox Node 1 - Bond Member 1", "trunk", True, False, "1000", "full"),
-            "2": ("Proxmox Node 1 - Bond Member 2", "trunk", True, False, "1000", "full"),
-            "3": ("Proxmox Node 2", "trunk", True, False, "1000", "full"),
-            "4": ("Proxmox Node 2", "trunk", True, False, "1000", "full"),
-            # Ports 5-9: defaults (access, vlan 1)
-            # Ports 10-20: workstations
-            # Ports 21-30: VoIP
-            # Ports 31-39: disabled
-            # Ports 40-45: cameras
-            # Ports 46-48: IoT sensors
+            "0": ("Proxmox Node 1 - Bond Member 1", "trunk", True, False, "a-1 Gbps", "a-full"),
+            "1": ("Proxmox Node 1 - Bond Member 2", "trunk", True, False, "a-1 Gbps", "a-full"),
+            "2": ("Proxmox Node 2", "trunk", True, False, "a-1 Gbps", "a-full"),
+            "3": ("Proxmox Node 2", "trunk", True, False, "a-1 Gbps", "a-full"),
         }
 
-        for i in range(1, 49):
+        for i in range(48):
             port_id = str(i)
 
             if port_id in port_defs:
@@ -78,51 +72,51 @@ class MockS2500Driver(BaseDriver):
                     poe_power_mw=0,
                     mac_addresses=[_random_mac() for _ in range(random.randint(1, 4))],
                 )
-            elif 5 <= i <= 9:
+            elif 4 <= i <= 8:
                 # Default ports - mostly down
                 up = random.random() < 0.3
                 ports[port_id] = PortStatus(
                     port_id=port_id,
                     admin_status="up",
                     oper_status="up" if up else "down",
-                    speed="1000" if up else "auto",
-                    duplex="full" if up else "auto",
+                    speed="a-1 Gbps" if up else "auto",
+                    duplex="a-full" if up else "auto",
                     vlan="1",
                     description="",
                     poe_status="searching" if not up else "delivering",
                     poe_power_mw=random.uniform(2000, 8000) if up else 0,
                 )
-            elif 10 <= i <= 20:
+            elif 9 <= i <= 19:
                 # Workstations
                 up = random.random() < 0.7
                 ports[port_id] = PortStatus(
                     port_id=port_id,
                     admin_status="up",
                     oper_status="up" if up else "down",
-                    speed="1000" if up else "auto",
-                    duplex="full" if up else "auto",
+                    speed="a-1 Gbps" if up else "auto",
+                    duplex="a-full" if up else "auto",
                     vlan="30",
                     description="Office workstations",
                     poe_status="delivering" if up else "searching",
                     poe_power_mw=random.uniform(3000, 12000) if up else 0,
                     mac_addresses=[_random_mac()] if up else [],
                 )
-            elif 21 <= i <= 30:
+            elif 20 <= i <= 29:
                 # VoIP phones
                 up = random.random() < 0.8
                 ports[port_id] = PortStatus(
                     port_id=port_id,
                     admin_status="up",
                     oper_status="up" if up else "down",
-                    speed="100" if up else "auto",
-                    duplex="full" if up else "auto",
+                    speed="a-100 Mbps" if up else "auto",
+                    duplex="a-full" if up else "auto",
                     vlan="40",
                     description="VoIP phones",
                     poe_status="delivering" if up else "searching",
                     poe_power_mw=random.uniform(4000, 7000) if up else 0,
                     mac_addresses=[_random_mac()] if up else [],
                 )
-            elif 31 <= i <= 39:
+            elif 30 <= i <= 38:
                 # Disabled ports
                 ports[port_id] = PortStatus(
                     port_id=port_id,
@@ -135,15 +129,15 @@ class MockS2500Driver(BaseDriver):
                     poe_status="disabled",
                     poe_power_mw=0,
                 )
-            elif 40 <= i <= 45:
+            elif 39 <= i <= 44:
                 # Cameras
                 up = random.random() < 0.9
                 ports[port_id] = PortStatus(
                     port_id=port_id,
                     admin_status="up",
                     oper_status="up" if up else "down",
-                    speed="100" if up else "auto",
-                    duplex="full" if up else "auto",
+                    speed="a-100 Mbps" if up else "auto",
+                    duplex="a-full" if up else "auto",
                     vlan="100",
                     description="Security cameras",
                     poe_status="delivering" if up else "searching",
@@ -151,14 +145,14 @@ class MockS2500Driver(BaseDriver):
                     mac_addresses=[_random_mac()] if up else [],
                 )
             else:
-                # 46-48 IoT sensors
+                # 45-47 IoT sensors
                 up = random.random() < 0.6
                 ports[port_id] = PortStatus(
                     port_id=port_id,
                     admin_status="up",
                     oper_status="up" if up else "down",
-                    speed="100" if up else "auto",
-                    duplex="full" if up else "auto",
+                    speed="a-100 Mbps" if up else "auto",
+                    duplex="a-full" if up else "auto",
                     vlan="100",
                     description="IoT sensors",
                     poe_status="delivering" if up else "searching",
@@ -166,33 +160,20 @@ class MockS2500Driver(BaseDriver):
                     mac_addresses=[_random_mac()] if up else [],
                 )
 
-        # SFP+ uplinks (49-52)
-        for i in range(49, 53):
-            port_id = str(i)
-            if i <= 51:
-                ports[port_id] = PortStatus(
-                    port_id=port_id,
-                    admin_status="up",
-                    oper_status="up" if i <= 51 else "down",
-                    speed="10000",
-                    duplex="full",
-                    vlan="trunk",
-                    description=f"SFP+ Uplink {i - 48}",
-                    poe_status="disabled",
-                    poe_power_mw=0,
-                )
-            else:
-                ports[port_id] = PortStatus(
-                    port_id=port_id,
-                    admin_status="down",
-                    oper_status="down",
-                    speed="auto",
-                    duplex="auto",
-                    vlan="trunk",
-                    description="Spare SFP+ - disabled",
-                    poe_status="disabled",
-                    poe_power_mw=0,
-                )
+        # SFP+ uplinks (port IDs 48-49, mapping to GE0/1/0-1)
+        for i in range(2):
+            port_id = str(48 + i)
+            ports[port_id] = PortStatus(
+                port_id=port_id,
+                admin_status="up",
+                oper_status="up" if i == 0 else "down",
+                speed="n/a",
+                duplex="n/a",
+                vlan="trunk",
+                description=f"SFP+ Uplink {i + 1}",
+                poe_status="disabled",
+                poe_power_mw=0,
+            )
 
         return ports
 
@@ -229,7 +210,7 @@ class MockS2500Driver(BaseDriver):
             "vlan 200\n"
             '  name "guest"\n'
             "!\n"
-            "interface GE0/0/1\n"
+            "interface GE0/0/0\n"
             '  description "Proxmox Node 1 - Bond Member 1"\n'
             "  switchport mode trunk\n"
             "  switchport trunk native vlan 1\n"

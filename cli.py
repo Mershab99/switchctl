@@ -25,7 +25,7 @@ DEFAULT_CONFIG = "config/switch.yaml"
 @app.command()
 def status(
     mock: bool = typer.Option(False, "--mock", help="Use mock driver"),
-    config: Path = typer.Option(DEFAULT_CONFIG, "--config", "-c", help="Config file path"),
+    config: Path = typer.Option(DEFAULT_CONFIG, "--file", "-f", help="Path to switch YAML config file"),
     output_json: bool = typer.Option(False, "--json", help="Output as JSON"),
 ):
     """Show current switch status."""
@@ -102,7 +102,7 @@ def status(
 @app.command()
 def diff(
     mock: bool = typer.Option(False, "--mock", help="Use mock driver"),
-    config: Path = typer.Option(DEFAULT_CONFIG, "--config", "-c", help="Config file path"),
+    config: Path = typer.Option(DEFAULT_CONFIG, "--file", "-f", help="Path to switch YAML config file"),
 ):
     """Show planned changes (desired vs current state)."""
     cfg = load_config(config)
@@ -151,7 +151,7 @@ def diff(
 @app.command()
 def apply(
     mock: bool = typer.Option(False, "--mock", help="Use mock driver"),
-    config: Path = typer.Option(DEFAULT_CONFIG, "--config", "-c", help="Config file path"),
+    config: Path = typer.Option(DEFAULT_CONFIG, "--file", "-f", help="Path to switch YAML config file"),
     save: bool = typer.Option(False, "--save", help="Save config after apply (write memory)"),
     yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompt"),
 ):
@@ -194,7 +194,7 @@ def apply(
 @app.command()
 def backup(
     mock: bool = typer.Option(False, "--mock", help="Use mock driver"),
-    config: Path = typer.Option(DEFAULT_CONFIG, "--config", "-c", help="Config file path"),
+    config: Path = typer.Option(DEFAULT_CONFIG, "--file", "-f", help="Path to switch YAML config file"),
     output: Path = typer.Option(None, "--output", "-o", help="Output file path"),
 ):
     """Backup running configuration from the switch."""

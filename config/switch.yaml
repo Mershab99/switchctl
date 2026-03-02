@@ -6,10 +6,10 @@ name: "homelab-s2500"
 # Connection credentials
 # Use environment variables for secrets: ${ENV_VAR_NAME}
 credentials:
-  host: "192.168.1.10"
+  host: "192.168.2.233"
   username: "admin"
   password: "${SWITCH_PASSWORD}"
-  enable_password: "${SWITCH_ENABLE_PASSWORD}"  # Optional
+  enable_password: "${SWITCH_ENABLE_PASSWORD}"
   port: 22
   device_type: "aruba_os"  # Don't change - this is for S2500
 
@@ -19,27 +19,27 @@ credentials:
 vlans:
   - id: 1
     name: "default"
-    
+
   - id: 10
     name: "management"
     description: "Network management VLAN"
-    
+
   - id: 20
     name: "servers"
     description: "Server infrastructure"
-    
+
   - id: 30
     name: "workstations"
     description: "Employee workstations"
-    
+
   - id: 40
     name: "voip"
     description: "VoIP phones"
-    
+
   - id: 100
     name: "iot"
     description: "IoT devices - isolated"
-    
+
   - id: 200
     name: "guest"
     description: "Guest network - internet only"
@@ -58,27 +58,28 @@ port_defaults:
 
 # =============================================================================
 # Port-Specific Configuration
-# Supports single ports ("1") or ranges ("1-10")
+# Port numbering is 0-indexed to match switch interface names:
+#   GE0/0/0 = port "0", GE0/0/47 = port "47"
 # =============================================================================
 ports:
   # ---------------------------------------------------------------------------
   # Trunk Ports - Server/Hypervisor connections
   # ---------------------------------------------------------------------------
-  "1":
+  "0":
     description: "Proxmox Node 1 - Bond Member 1"
     mode: trunk
     trunk_native_vlan: 1
     trunk_allowed_vlans: [1, 10, 20, 100]
     poe_enabled: false
-    
-  "2":
+
+  "1":
     description: "Proxmox Node 1 - Bond Member 2"
     mode: trunk
     trunk_native_vlan: 1
     trunk_allowed_vlans: [1, 10, 20, 100]
     poe_enabled: false
 
-  "3-4":
+  "2-3":
     description: "Proxmox Node 2"
     mode: trunk
     trunk_allowed_vlans: "1,10,20,100"  # String format also works
@@ -87,7 +88,7 @@ ports:
   # ---------------------------------------------------------------------------
   # Access Ports - Workstations
   # ---------------------------------------------------------------------------
-  "10-20":
+  "9-19":
     description: "Office workstations"
     mode: access
     access_vlan: 30
@@ -97,7 +98,7 @@ ports:
   # ---------------------------------------------------------------------------
   # VoIP Phones
   # ---------------------------------------------------------------------------
-  "21-30":
+  "20-29":
     description: "VoIP phones"
     mode: access
     access_vlan: 40
@@ -107,14 +108,14 @@ ports:
   # ---------------------------------------------------------------------------
   # IoT / Camera Ports
   # ---------------------------------------------------------------------------
-  "40-45":
+  "39-44":
     description: "Security cameras"
     mode: access
     access_vlan: 100
     poe_enabled: true
     poe_priority: critical  # Cameras must stay powered
 
-  "46-48":
+  "45-47":
     description: "IoT sensors"
     mode: access
     access_vlan: 100
@@ -124,32 +125,24 @@ ports:
   # ---------------------------------------------------------------------------
   # Disabled/Reserved Ports
   # ---------------------------------------------------------------------------
-  "31-39":
+  "30-38":
     enabled: false
     description: "Reserved - disabled for security"
 
 # =============================================================================
 # Uplink Ports (SFP+)
-# Port numbering may be 49-52 or sfp1-sfp4 depending on firmware
+# ArubaS2500-48P has 2 SFP+ uplinks: GE0/1/0 and GE0/1/1
+# Port IDs 48-49 map to GE0/1/0-1
 # =============================================================================
 uplinks:
-  "49":
+  "48":
     description: "Uplink to Core Switch - Primary"
     mode: trunk
     trunk_native_vlan: 1
     trunk_allowed_vlans: "1-200"  # Range syntax
-    
-  "50":
-    description: "Uplink to Core Switch - Secondary"  
+
+  "49":
+    description: "Uplink to Core Switch - Secondary"
     mode: trunk
     trunk_native_vlan: 1
     trunk_allowed_vlans: "1-200"
-    
-  "51":
-    description: "Inter-switch link"
-    mode: trunk
-    trunk_allowed_vlans: "1-200"
-    
-  "52":
-    enabled: false
-    description: "Spare SFP+ - disabled"

@@ -1,0 +1,11 @@
+Value PORT (\S+)
+Value ADMIN (\S+)
+Value CONSUMPTION_MW (\d+)
+Value PRIORITY (\S+)
+Value POE_STATUS (\S+)
+
+Start
+  ^--- -> PoEData
+
+PoEData
+  ^${PORT}\s+${ADMIN}\s+${CONSUMPTION_MW}\s+${PRIORITY}\s+${POE_STATUS}\s*$$ -> Record
